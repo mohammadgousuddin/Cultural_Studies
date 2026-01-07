@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Students Life in Dubai: Expectations Vs Reality</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+            background-color: rgba(17, 24, 39, 1); /* Dark background for presentation mode */
+            color: #f9fafb; /* Light text default */
+            
+            /* --- NEW: Centering Content --- */
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Vertically centers the content */
+            min-height: 100vh; /* Ensures body is full height */
+            /* --- END NEW --- */
+        }
+
+        /* --- BACKGROUND STYLES --- */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("C:\\Users\\jamuz\\Documents\\UAE\\01. Cultural\\Midterm Project, 19 November\\Images\\background3.png");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            filter: blur(2px) brightness(0.5);
+            z-index: -2;
+        }
+
+        @keyframes starfall {
+          0% { transform: translateY(-50px); opacity: 0; }
+          10%, 90% { opacity: 1; }
+          100% { transform: translateY(100vh); opacity: 0; }
+        }
+
+        .stars-container {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: -1;
+          overflow: hidden;
+        }
+
+        .star {
+          position: absolute;
+          width: 2px;
+          height: 2px;
+          background: white;
+          border-radius: 50%;
+          box-shadow: 0 0 4px white, 0 0 8px white;
+          animation: starfall 10s linear infinite;
+        }
+        .star:nth-child(1) { top: 10%; left: 20%; animation-delay: 0s; animation-duration: 8s; }
+        .star:nth-child(2) { top: 30%; left: 80%; animation-delay: -2s; animation-duration: 10s; }
+        .star:nth-child(3) { top: 50%; left: 50%; animation-delay: -5s; animation-duration: 7s; }
+        .star:nth-child(4) { top: 0%; left: 90%; animation-delay: -3s; animation-duration: 9s; }
+        .star:nth-child(5) { top: 40%; left: 10%; animation-delay: -8s; animation-duration: 12s; }
+        .star:nth-child(6) { top: 80%; left: 30%; animation-delay: -1s; animation-duration: 6s; }
+        .star:nth-child(7) { top: 60%; left: 70%; animation-delay: -6s; animation-duration: 8s; }
+        .star:nth-child(8) { top: 20%; left: 40%; animation-delay: -4s; animation-duration: 11s; }
+        .star:nth-child(9) { top: 5%; left: 60%; animation-delay: -1.5s; animation-duration: 9s; }
+        .star:nth-child(10) { top: 70%; left: 5%; animation-delay: -7s; animation-duration: 7s; }
+
+        /* --- PRESENTATION STYLES --- */
+        .presentation-container {
+            width: 100%;
+            max-width: 1280px; /* Max width for the slide */
+            margin-left: auto;
+            margin-right: auto;
+            padding: 1rem;
+        }
+        
+        .slide {
+            display: none; /* Hidden by default */
+            width: 100%;
+            aspect-ratio: 16 / 9; /* Force 16:9 aspect ratio */
+            
+            /* Use flex to center content in the slide */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            
+            background-color: white; /* White canvas for content */
+            color: #1f2937; /* Dark text for content */
+            border-radius: 0.5rem;
+            
+            /* Keep the glow effect */
+            animation: pulse-glow 8s infinite alternate;
+            
+            /* Add padding *inside* the slide */
+            padding: 2.5rem; /* 40px */
+            overflow: hidden; /* Hide anything that overflows */
+        }
+
+        .slide.active {
+            display: flex; /* Show the active slide */
+        }
+        
+        /* Special case for title slide (no white bg) */
+        .slide.title-slide {
+            background-color: transparent;
+            color: white;
+            animation: none; /* No glow on title */
+            box-shadow: none;
+        }
+
+        .slide-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            color: white;
+        }
+        
+        .nav-button {
+            background-color: rgba(31, 41, 55, 0.7);
+            border: 1px solid rgba(107, 114, 128, 0.5);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1.125rem; /* NEW: text-lg */
+            line-height: 1.75rem;
+        }
+        .nav-button:hover {
+            background-color: rgba(55, 65, 81, 0.9);
+        }
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* --- CHART & CONTENT STYLES (from old file) --- */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            /* Make chart height flexible */
+            height: 100%; 
+            max-height: 300px; /* Reduced max height for slides */
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .flow-step {
+            @apply p-4 rounded-lg text-center font-semibold shadow text-lg; /* NEW: text-lg */
+        }
+        .flow-arrow {
+            @apply text-4xl text-gray-400 flex items-center justify-center;
+        }
+
+        .cultural-image {
+            filter: saturate(1.2);
+            transition: all 0.3s ease-in-out;
+        }
+        .cultural-image:hover {
+            filter: saturate(1.5) brightness(1.1);
+            transform: scale(1.03);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); }
+            50% { box-shadow: 0 10px 15px -3px rgba(237, 28, 36, 0.2), 0 4px 6px -4px rgba(237, 28, 36, 0.2); }
+            100% { box-shadow: 0 10px 15px -3px rgba(0, 174, 239, 0.2), 0 4px 6px -4px rgba(0, 174, 239, 0.2); }
+        }
+
+        /* --- NEW: Image Modal Styles --- */
+        .image-modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+        }
+        .image-modal.active {
+            display: flex;
+        }
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 80%;
+            max-height: 80vh;
+        }
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .modal-close:hover,
+        .modal-close:focus {
+            color: #bbb;
+            text-decoration: none;
+        }
+        .clickable-image {
+            cursor: zoom-in;
+        }
+        /* --- END NEW --- */
+
+    </style>
+</head>
+<body>
+
+    <!-- Starfall Container -->
+    <div class="stars-container">
+        <div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div>
+        <div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div>
+    </div>
+
+    <!-- Main Presentation Area -->
+    <div class="presentation-container">
+        
+        <!-- This wrapper holds all the slides -->
+        <div class="slide-wrapper">
+
+            
+            <!-- Slide 01: Title Slide -->
+            <div class="slide active title-slide">
+                <header class="text-center">
+                    <h1 class="text-5xl md:text-6xl font-bold mb-4">
+                        <span class="text-red-600">Students Life in Dubai:</span>
+                        <span class="text-blue-600">Expectations Vs Reality</span>
+                    </h1>
+                    <p class="text-3xl md:text-4xl font-semibold">
+                        <span class="text-red-600">(1)</span> <span class="text-gray-200">vs</span> <span class="text-blue-600">(2)</span>
+                    </p>
+                    <p class="text-xl text-gray-200 mt-4 max-w-3xl mx-auto">
+                        Exploring two distinct and highly-regarded educational philosophies, this analysis compares Japan's focus on <b>"Rigor"</b> and 
+                        mastery with Scotland's <b>"Holistic"</b> Excellence across five key performance metrics.
+                    </p>
+                </header>
+            </div>
+
+            <!-- Slide 02: Starting Dubai to Japan Video -->
+            <div class="slide">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">LETS GO TO JAPAN!</h2>
+                <p class="text-lg text-gray-700 mb-6 text-center">
+                    <!-- This video provides an external perspective on the contrasting cultural values that underpin these educational systems. -->
+                </p>
+                <div class="aspect-video w-full max-w-3xl rounded-lg overflow-hidden shadow-xl">
+                    <video 
+                        id="presentation-video"
+                        class="w-full h-full object-cover" 
+                        controls
+                        poster="https://placehold.co/1280x720/E5E7EB/9CA3AF?text=Video+Placeholder"
+                    >
+                        <source src="C:\Users\jamuz\Documents\UAE\01. Cultural\Midterm Project, 19 November\Videos\dubaitojapan.mp4">
+                        <p class="p-4 bg-red-100 text-red-800">Your browser does not support the video tag.</p>
+                    </video>
+                </div>
+            </div>
+            
+            <!-- Slide 03: Japan Education System -->
+            <div class="slide">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 w-full text-center">Education Style</h2>
+                <div class="grid grid-cols-1 md:grid-cols-1 gap-4 w-full flex-grow">
+                    <!-- Japan Item -->
+                    <div class="grid grid-cols-4 gap-4">
+                        <img src="C:\Users\jamuz\Documents\UAE\01. Cultural\Midterm Project, 19 November\Images\japan education system. .png" alt="Japanese sushi" class="w-full h-full object-cover rounded-lg shadow col-span-3 clickable-image">
+                        <div class="flex flex-col justify-center col-span-1">
+                            <h3 class="text-2xl font-bold text-red-600 mb-4">Japan</h3>
+                            <p class="text-base text-gray-700">
+                                <p>1. Character before academic knowledge.</p>
+                                2. Character is the foundation of learning.<p></p>
+                                3. Japanese School Days are longest in the world.<p></p>
+                                4. Teachers are Highly respected in Japan.<p></p>
+                                5. There is no Prom in Japan.<p></p>
+                                6. There are no janitors in Japanese schools.<p></p>
+                            </p>
+                        </div>
+                    </div>
+                    <!-- Scotland Item -->
+                    <!-- <div class="grid grid-cols-4 gap-4">
+                        <img src="https://placehold.co/400x600/E6F7FF/005EB8?text=Scottish+Food" alt="Scottish food" class="w-full h-full object-cover rounded-lg shadow col-span-3 clickable-image">
+                        <div class="flex flex-col justify-center col-span-1">
+                            <h3 class="text-2xl font-bold text-blue-600 mb-4">Scotland: Hearty & Local</h3>
+                            <p class="text-base text-gray-700">
+                                Scottish cuisine is known for its rich, hearty dishes using local produce, game, and seafood. Famous for haggis, salmon, and whisky, its traditions are rooted in a history of resourcefulness.
+                            </p>
+                        </div>
+                    </div> -->
+                </div>
+            </div>
+
+            <!-- Slide 04: Starting Japan to Scotland Video -->
+            <div class="slide">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">LETS GO TO SCOTLAND, UNITED KINGDOM!</h2>
+                <p class="text-lg text-gray-700 mb-6 text-center">
+                    <!-- This video provides an external perspective on the contrasting cultural values that underpin these educational systems. -->
+                </p>
+                <div class="aspect-video w-full max-w-3xl rounded-lg overflow-hidden shadow-xl">
+                    <video 
+                        id="presentation-video"
+                        class="w-full h-full object-cover" 
+                        controls
+                        poster="https://placehold.co/1280x720/E5E7EB/9CA3AF?text=Video+Placeholder"
+                    >
+                        <source src="C:\Users\jamuz\Documents\UAE\01. Cultural\Midterm Project, 19 November\Videos\japantoscotland.mp4">
+                        <p class="p-4 bg-red-100 text-red-800">Your browser does not support the video tag.</p>
+                    </video>
+                </div>
+            </div>
+
+             <!-- Slide 05: Scotland Education System -->
+            <div class="slide">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 w-full text-center">Education Style</h2>
+                <div class="grid grid-cols-1 md:grid-cols-1 gap-4 w-full flex-grow">
+                    <!-- Scotland Item -->
+                    <div class="grid grid-cols-4 gap-4">
+                        <img src="C:\Users\jamuz\Documents\UAE\01. Cultural\Midterm Project, 19 November\Images\scotlandeducationstyle.png" alt="Scottish education style" class="w-full h-full object-cover rounded-lg shadow col-span-3 clickable-image">
+                        <div class="flex flex-col justify-center col-span-1">
+                            <h3 class="text-2xl font-bold text-red-600 mb-4">Scotland</h3>
+                            <p class="text-base text-gray-700">
+                                <p>1. Literacy</p>
+                                   2. Numeracy.<p></p>
+                                   3. School Leaver Destinations .<p></p>
+                                   4. School Attendance.<p></p>
+                                   5. Health and Wellbeing.<p></p>
+                                   <p></p>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 06: PISA Scores -->
+            <div class="slide">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Key Academic Benchmarks: PISA Scores</h2>
+                <p class="text-lg text-gray-700 mb-6 text-center max-w-4xl">
+                    The Programme for International Student Assessment (PISA) provides a snapshot of academic proficiency. Japan consistently demonstrates high performance, while Scotland maintains strong, above-average literacy.
+                </p>
+                <div class="chart-container" style="max-width: 800px;">
+                    <canvas id="pisaChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Slide 07: Core Competency -->
+            <div class="slide">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Core Competency Focus</h2>
+                <p class="text-lg text-gray-700 mb-6 text-center max-w-4xl">
+                    This radar chart visualizes the relative emphasis of each system. Japan shows strength in diligence-based areas, while Scotland's "Curriculum for Excellence" prioritizes critical thinking.
+                </p>
+                <div class="chart-container">
+                    <canvas id="skillsRadarChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Slide 08: Educational Structure -->
+            <div class="slide">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Clarity & Organization: Educational Structure</h2>
+                <p class="text-lg text-gray-700 mb-8 text-center max-w-4xl">
+                    Both nations provide clear, structured pathways, but with different philosophies.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
+                    <div>
+                        <h3 class="text-2xl font-bold text-red-600 mb-4 text-center">Japan: National Progression</h3>
+                        <div class="flex flex-col space-y-2">
+                            <div class="flow-step bg-red-100 border-l-4 border-red-600 text-gray-800">Elementary (6 yrs)</div>
+                            <div class="flow-arrow self-center">↓</div>
+                            <div class="flow-step bg-red-100 border-l-4 border-red-600 text-gray-800">Middle School (3 yrs)</div>
+                            <div class="flow-arrow self-center">↓</div>
+                            <div class="flow-step bg-red-100 border-l-4 border-red-600 text-gray-800">High School (3 yrs)</div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-blue-600 mb-4 text-center">Scotland: Curriculum for Excellence</h3>
+                        <div class="flex flex-col space-y-2">
+                            <div class="flow-step bg-blue-100 border-l-4 border-blue-600 text-gray-800">Primary (7 yrs)</div>
+                            <div class="flow-arrow self-center">↓</div>
+                            <div class="flow-step bg-blue-100 border-l-4 border-blue-600 text-gray-800">Secondary (S1-S3 BGE)</div>
+                            <div class="flow-arrow self-center">↓</div>
+                            <div class="flow-step bg-blue-100 border-l-4 border-blue-600 text-gray-800">Secondary (S4-S6 Senior)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 09: Presentation Skills (Combined) -->
+            <div class="slide">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 w-full text-center">Presentation & Communication Skills</h2>
+                <div class="grid grid-cols-2 gap-8 w-full h-full items-center">
+                    <div>
+                        <p class="text-lg text-gray-700 mb-4 text-center">Japan's system relies on high-stakes exams for knowledge retention.</p>
+                        <div class="chart-container"><canvas id="japanAssessmentChart"></canvas></div>
+                    </div>
+                    <div>
+                        <p class="text-lg text-gray-700 mb-4 text-center">Scotland's model uses continuous assessment for critical thinking.</p>
+                        <div class="chart-container"><canvas id="scotlandAssessmentChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 10: Time Management -->
+            <div class="slide">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Time Management & Adherence</h2>
+                <p class="text-lg text-gray-700 mb-8 text-center max-w-4xl">
+                    A stark difference is visible in the time commitment. Japan's culture of diligence, supplemented by "juku" (cram schools), results in significantly longer average study hours.
+                </p>
+                <div class="grid grid-cols-2 gap-4 text-center w-full max-w-2xl">
+                    <div>
+                        <div class="text-7xl font-bold text-red-600">35+</div>
+                        <div class="text-2xl font-semibold text-gray-700">Avg. Weekly Study Hours</div>
+                        <div class="text-lg font-medium text-red-600">Japan</div>
+                    </div>
+                    <div>
+                        <div class="text-7xl font-bold text-blue-600">25</div>
+                        <div class="text-2xl font-semibold text-gray-700">Avg. Weekly Study Hours</div>
+                        <div class="text-lg font-medium text-blue-600">Scotland</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 11: INTRESTING WORDS -->
+            <div class="slide">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Two Words to Learn</h2>
+                <p class="text-lg text-gray-700 mb-8 text-center max-w-4xl">
+                    Let's look at two words that define each educational system. 
+                </p>
+                <div class="grid grid-cols-2 gap-4 text-center w-full max-w-2xl">
+                    <div>
+                        <div class="text-7xl font-bold text-red-600">Bukatsudo</div>
+                        <div class="text-2xl font-semibold text-gray-700">Extracurricular club activities</div>
+                        <div class="text-lg font-medium text-red-600">Japan</div>
+                    </div>
+                    <div>
+                        <div class="text-7xl font-bold text-blue-600">Quality Education</div>
+                        <div class="text-2xl font-semibold text-gray-700">Equal Opportunities</div>
+                        <div class="text-lg font-medium text-blue-600">Scotland</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 12: Conclusion -->
+            <div class="slide">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Conclusion: Two Paths to Excellence</h2>
+                <p class="text-2xl text-gray-700 text-center max-w-5xl">
+                    This analysis reveals two distinct but effective models. 
+                    <P>Japan's system cultivates exceptional discipline, deep subject mastery, and unparalleled time-management. Scotland's model champions creativity, critical analysis, and confident communication. Both systems produce high-achieving students, offering valuable lessons on the different ways to define and achieve educational success.
+                </WELCOME>
+            </div>
+            
+
+            <!-- Slide 13: Thankyou Video -->
+            <div class="slide">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Thankyou for exploring these educational systems.</h2>
+                <p class="text-lg text-gray-700 mb-6 text-center">
+                    Let Go to Dubai. any questions?
+                </p>
+                <div class="aspect-video w-full max-w-3xl rounded-lg overflow-hidden shadow-xl">
+                    <video 
+                        id="presentation-video"
+                        class="w-full h-full object-cover" 
+                        controls
+                        poster="https://placehold.co/1280x720/E5E7EB/9CA3AF?text=Video+Placeholder"
+                    >
+                        <source src="C:\Users\jamuz\Documents\UAE\01. Cultural\Midterm Project, 19 November\Videos\scotlandtodubai.mp4" type="video/mp4">
+                        <p class="p-4 bg-red-100 text-red-800">Your browser does not support the video tag.</p>
+                    </video>
+                </div>
+            </div>
+            
+            
+
+            <!-- Slide 12: References (Combined) -->
+            <div class="slide">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Data Sources & References</h2>
+                <p class="text-lg text-gray-700 mb-4 text-center">
+                    The data and information presented in this infographic are synthesized from various authoritative sources:
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-lg text-gray-700 pl-4">
+                    <li>OECD (2023). PISA 2022 Results: What Students Know and Can Do (Volume I & II). OECD Publishing.</li>
+                    <li>Japan Ministry of Education, Culture, Sports, Science and Technology (MEXT). (n.d.). *Education in Japan*.</li>
+                    <li>Education Scotland. (n.d.). *Curriculum for Excellence*.</li>
+                    <li>Various academic journals on comparative international education and cultural studies.</li>
+		            <li>https://interacnetwork.com/dress-to-impress-the-alt-dress-code/</li>
+		            <li>https://education.jnto.go.jp/en/school-in-japan/school-life-in-japan/club-activities-in-japanese-schools/</li>
+		            <li>https://www.uk.emb-japan.go.jp/japanuk150/events/academia/JPF_Bukatsudo.html</li>
+		            <li>https://www.quora.com/Why-are-school-janitors-uncommon-in-Japan</li>
+		            <li>https://www.gov.scot/publications/achievement-curriculum-excellence-cfe-levels-2022-23/pages/11/</li>
+		            <li>https://www.tes.com/magazine/analysis/general/progress-being-made-in-key-attainment-gap-measures-scotland#:~:text=The%20overall%20attendance%20rate%20went,89.6%20per%20cent%20in%202023</li>
+		            <li>https://www.gov.scot/publications/fairer-scotland-duty-assessment-scottish-attainment-challenge-2022-2023-2025-2026/</li>
+		            <li>https://highlandliteracy.com/2015/10/28/education-scotland-revised-significant-aspects-of-learning/</li>
+
+                </ul>
+                <p class="text-base text-gray-500 mt-4"><i></i></p>
+                <footer class="text-center text-base text-gray-500 mt-12">
+                    <p>By - Mohammad Gousuddin, Ms Data Science, Calutral Studies Midterm Project</p>
+                    <p>Prof Iryna Haveyliuk</p>
+                </footer>
+            </div>
+
+        </div> <!-- End .slide-wrapper -->
+        
+        <!-- Navigation Buttons -->
+        <div class="slide-navigation">
+            <button id="prev-slide" class="nav-button">&larr; Previous</button>
+            <!-- NEW: Added center div for counter and fullscreen -->
+            <div class="flex items-center gap-4">
+                <span id="slide-counter" class="font-semibold text-lg">1 / 12</span>
+                <button id="fullscreen-btn" class="nav-button">Full Screen</button>
+            </div>
+            <button id="next-slide" class="nav-button">Next &rarr;</button>
+        </div>
+
+    </div> <!-- End .presentation-container -->
+
+    <!-- NEW: Image Modal HTML -->
+    <div id="image-modal" class="image-modal">
+        <span id="modal-close-btn" class="modal-close">&times;</span>
+        <img class="modal-content" id="modal-image-content">
+    </div>
+    <!-- END NEW -->
+
+
+    <!-- Chart.js Initialization Script (from old file) -->
+    <script>
+        // Chart.js data and options are defined here, but will be initialized
+        // by the presentation script after the first slide is shown.
+        let pisaChart, skillsRadarChart, japanAssessmentChart, scotlandAssessmentChart;
+
+        function initCharts() {
+            // Set default font color for all charts
+            Chart.defaults.color = '#374151'; 
+            Chart.defaults.borderColor = '#D1D5DB';
+
+            const tooltipTitleCallback = {
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                const item = tooltipItems[0];
+                                let label = item.chart.data.labels[item.dataIndex];
+                                return Array.isArray(label) ? label.join(' ') : label;
+                            }
+                        }
+                    }
+                }
+            };
+
+            function wrapLabels(label) {
+                if (typeof label === 'string' && label.length > 16) {
+                    const words = label.split(' ');
+                    const lines = [];
+                    let currentLine = '';
+                    words.forEach(word => {
+                        if ((currentLine + word).length > 16 && currentLine.length > 0) {
+                            lines.push(currentLine.trim());
+                            currentLine = word + ' ';
+                        } else {
+                            currentLine += word + ' ';
+                        }
+                    });
+                    lines.push(currentLine.trim());
+                    return lines;
+                }
+                return label;
+            }
+
+            // --- Chart 1: PISA ---
+            if (document.getElementById('pisaChart')) {
+                const pisaCtx = document.getElementById('pisaChart').getContext('2d');
+                pisaChart = new Chart(pisaCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Reading', 'Mathematics', 'Science'],
+                        datasets: [
+                            { label: 'Japan', data: [504, 527, 529], backgroundColor: '#ED1C24', borderWidth: 1 },
+                            { label: 'Scotland', data: [504, 489, 490], backgroundColor: '#00AEEF', borderWidth: 1 }
+                        ]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { ...tooltipTitleCallback.plugins, legend: { position: 'top', labels: { color: '#111827' } } },
+                        scales: {
+                            y: { beginAtZero: false, min: 450, title: { display: true, text: 'PISA Score', color: '#111827' } },
+                        }
+                    }
+                });
+            }
+
+            // --- Chart 2: Radar ---
+            if (document.getElementById('skillsRadarChart')) {
+                const skillsRadarCtx = document.getElementById('skillsRadarChart').getContext('2d');
+                const radarLabels = ["Research Quality", "Critical Thinking", "Clarity", "Communication", "Time Management"].map(wrapLabels);
+                skillsRadarChart = new Chart(skillsRadarCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: radarLabels,
+                        datasets: [
+                            { label: 'Japan', data: [8, 6, 9, 6, 10], backgroundColor: 'rgba(237, 28, 36, 0.2)', borderColor: '#ED1C24', pointBackgroundColor: '#ED1C24' },
+                            { label: 'Scotland', data: [7, 9, 7, 9, 7], backgroundColor: 'rgba(0, 174, 239, 0.2)', borderColor: '#00AEEF', pointBackgroundColor: '#00AEEF' }
+                        ]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { ...tooltipTitleCallback.plugins, legend: { position: 'top', labels: { color: '#111827' } } },
+                        scales: {
+                            r: { suggestedMin: 0, suggestedMax: 10, pointLabels: { font: { size: 11 }, color: '#374151' }, ticks: { backdropColor: 'rgba(255, 255, 255, 0.75)' } }
+                        }
+                    }
+                });
+            }
+
+            // --- Chart 3: Japan Doughnut ---
+            if (document.getElementById('japanAssessmentChart')) {
+                const japanAssessmentCtx = document.getElementById('japanAssessmentChart').getContext('2d');
+                japanAssessmentChart = new Chart(japanAssessmentCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Examinations', 'Coursework', 'Group Projects', 'Presentation'],
+                        datasets: [{ label: 'Japan Assessment Method', data: [60, 20, 10, 10], backgroundColor: ['#ED1C24', '#F7941D', '#FCEE21', '#231F20'], hoverOffset: 4 }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { ...tooltipTitleCallback.plugins, legend: { position: 'bottom', labels: { color: '#111827' } }, title: { display: true, text: 'Japan: Assessment Breakdown', color: '#111827' } }
+                    }
+                });
+            }
+            
+            // --- Chart 4: Scotland Doughnut ---
+            if (document.getElementById('scotlandAssessmentChart')) {
+                const scotlandAssessmentCtx = document.getElementById('scotlandAssessmentChart').getContext('2d');
+                scotlandAssessmentChart = new Chart(scotlandAssessmentCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Examinations', 'Coursework', 'Group Projects', 'Presentation'],
+                        datasets: [{ label: 'Scotland Assessment Method', data: [40, 30, 15, 15], backgroundColor: ['#00AEEF', '#F7941D', '#FCEE21', '#231F20'], hoverOffset: 4 }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { ...tooltipTitleCallback.plugins, legend: { position: 'bottom', labels: { color: '#111827' } }, title: { display: true, text: 'Scotland: Assessment Breakdown', color: '#111827' } }
+                    }
+                });
+            }
+        }
+    </script>
+    
+    <!-- Presentation Navigation & Modal Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const slides = document.querySelectorAll('.slide');
+            const nextBtn = document.getElementById('next-slide');
+            const prevBtn = document.getElementById('prev-slide');
+            const counter = document.getElementById('slide-counter');
+            const video = document.getElementById('presentation-video');
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
+            let currentSlide = 0;
+            const totalSlides = slides.length;
+            
+            let chartsInitialized = false;
+
+            function showSlide(index) {
+                // Hide all slides
+                slides.forEach((slide) => {
+                    slide.classList.remove('active');
+                });
+                
+                // Show the target slide
+                if (slides[index]) {
+                    slides[index].classList.add('active');
+                }
+                
+                // Update counter
+                counter.textContent = `${index + 1} / ${totalSlides}`;
+                
+                // Update button visibility
+                prevBtn.disabled = (index === 0);
+                nextBtn.disabled = (index === totalSlides - 1);
+                
+                // Initialize charts *after* the first slide is shown
+                if (!chartsInitialized) {
+                    initCharts();
+                    chartsInitialized = true;
+                }
+
+                // --- Video Autoplay Logic ---
+                if (video) {
+                    if (index === 9) { // Slide 10 (index is 9)
+                        video.currentTime = 0; // Rewind to start
+                        video.play();
+                    } else {
+                        video.pause();
+                    }
+                }
+            }
+
+            // --- Slide Navigation Event Listeners ---
+            nextBtn.addEventListener('click', () => {
+                
+                // --- NEW: Fullscreen on video slide ---
+                // If we are currently on slide 9 (index 8) and moving to slide 10
+                if (currentSlide === 8 && !document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                    });
+                }
+                // --- END NEW ---
+
+                if (currentSlide < totalSlides - 1) {
+                    currentSlide++;
+                    showSlide(currentSlide);
+                }
+            });
+
+            prevBtn.addEventListener('click', () => {
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    showSlide(currentSlide);
+                }
+            });
+
+            // Show the first slide initially
+            showSlide(0);
+
+            // --- Modal Image Logic ---
+            const modal = document.getElementById('image-modal');
+            const modalImg = document.getElementById('modal-image-content');
+            const closeModalBtn = document.getElementById('modal-close-btn');
+            const clickableImages = document.querySelectorAll('.clickable-image');
+
+            clickableImages.forEach(img => {
+                img.addEventListener('click', () => {
+                    modal.classList.add('active');
+                    modalImg.src = img.src;
+                });
+            });
+
+            function closeModal() {
+                modal.classList.remove('active');
+            }
+
+            closeModalBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                // Close if user clicks on the dark background, but not on the image itself
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+            
+            // --- Fullscreen Logic ---
+            function toggleFullScreen() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+
+            function updateFullscreenButton() {
+                if (document.fullscreenElement) {
+                    fullscreenBtn.textContent = "Exit Full Screen";
+                } else {
+                    fullscreenBtn.textContent = "Full Screen";
+                }
+            }
+
+            fullscreenBtn.addEventListener('click', toggleFullScreen);
+            document.addEventListener('fullscreenchange', updateFullscreenButton);
+        });
+    </script>
+</body>
+</html>
